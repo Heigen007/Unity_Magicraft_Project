@@ -22,7 +22,7 @@ MonoBehaviour:
   maxSpellSlots: 3
   passiveBuffs: []
   attackSpeed: 1
-  castDelay: 0.5
+  castDelay: 0.3
   rechargeTime: 0
   damageMultiplier: 1
   manaCostMultiplier: 1

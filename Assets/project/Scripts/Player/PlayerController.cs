@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Magicraft.Combat;
 
 namespace Magicraft.Player
 {
     /// <summary>
     /// Контроллер игрока: движение, поворот к курсору мыши
+    /// Реализует ICaster для интеграции с Wand
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, ICaster
     {
         [Header("Movement")]
         [Tooltip("Скорость движения игрока")]
@@ -23,23 +25,34 @@ namespace Magicraft.Player
         [Tooltip("Скорость поворота (0 = мгновенный, выше = плавнее)")]
         [SerializeField] private float rotationSpeed = 0f;
 
-        // Компоненты
-        private Rigidbody2D rb;
-        private Camera mainCamera;
+    // Компоненты
+    private Rigidbody2D rb;
+    private Camera mainCamera;
+    private ManaComponent manaComponent;
 
         // Input
         private Vector2 moveInput;
         private Vector2 currentVelocity;
 
         // Свойства
-        public Vector2 MoveDirection => moveInput;
-        public Vector2 AimDirection { get; private set; }
+    public Vector2 MoveDirection => moveInput;
+    public Vector2 AimDirection { get; private set; }
+        
+    // ICaster: Muzzle transform (can be assigned in Inspector)
+    [Header("Caster")]
+    [Tooltip("Точка выхода снаряда (пустой объект, дочерний к игроку)")]
+    [SerializeField] private Transform muzzle;
+
+    public Transform Muzzle => muzzle != null ? muzzle : transform;
         public bool IsMoving => moveInput.sqrMagnitude > 0.01f;
 
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
             mainCamera = Camera.main;
+
+            // Получить ManaComponent (если есть)
+            manaComponent = GetComponent<ManaComponent>();
 
             // Настройка Rigidbody2D для top-down игры
             rb.gravityScale = 0f;
@@ -121,6 +134,19 @@ namespace Magicraft.Player
             Vector2 direction = (mouseWorldPos - transform.position).normalized;
             AimDirection = direction;
         }
+
+        #region ICaster Implementation
+        public bool TrySpendMana(float amount)
+        {
+            if (manaComponent == null) return true; // если мана нет - пропустим траты
+            return manaComponent.TrySpend(amount);
+        }
+
+        public void OnSpellCasted(CastContext context)
+        {
+            // Hook для визуальных/аудио эффектов. Пока пусто.
+        }
+        #endregion
 
         /// <summary>
         /// Поворот игрока в направлении курсора
