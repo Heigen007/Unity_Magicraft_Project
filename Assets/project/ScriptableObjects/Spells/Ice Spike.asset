@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2644b675e1020d144a1c96f37d33890f, type: 3}
+  m_Name: Ice Spike
+  m_EditorClassIdentifier: 
+  Id: Ice Spike
+  DisplayName: Ice Spike
+  Icon: {fileID: 0}
+  Description: "\u041B\u0435\u0434\u044F\u043D\u043E\u0439 \u0448\u0438\u043F, \u043F\u0440\u043E\u0431\u0438\u0432\u0430\u044E\u0449\u0438\u0439
+    \u0432\u0440\u0430\u0433\u043E\u0432"
+  ExecutionType: 0
+  ProjectilePrefab: {fileID: 0}
+  BaseDamage: 15
+  BaseManaCost: 10
+  BaseCooldown: 0.8
+  ProjectileSpeed: 15
+  Range: 12
+  Pierce: 3
+  Tags: 0200000006000000

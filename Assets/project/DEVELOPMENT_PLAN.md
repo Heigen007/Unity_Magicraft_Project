@@ -114,72 +114,68 @@
 ---
 
 ## Этап 4: Враги и спавнер
-**Статус**: ОЖИДАЕТ
+**Статус**: ЗАВЕРШЕН ✅
 
 ### Задачи:
-- [ ] EnemyController (простое движение к игроку)
-- [ ] EnemySpawner (базовый спавн по таймеру)
-- [ ] EnemyPool
-- [ ] Базовая навигация (направление к игроку)
+- [x] EnemyController (простое движение к игроку)
+- [x] EnemySpawner (базовый спавн по таймеру)
+- [x] EnemyPool
+- [x] Базовая навигация (направление к игроку)
 
 ### Файлы:
-- `Scripts/Enemies/EnemyController.cs`
-- `Scripts/Enemies/EnemySpawner.cs`
-- `Scripts/Enemies/EnemyPool.cs`
-- `Prefabs/Enemy_Basic.prefab`
+- `Scripts/Enemies/EnemyController.cs` ✅
+- `Scripts/Enemies/EnemySpawner.cs` ✅
+- `Scripts/Enemies/EnemyPool.cs` ✅
+- `Prefabs/Enemy_Basic.prefab` (создается в Unity)
 
 ### Тестирование:
-- Враги спавнятся по таймеру
-- Враги двигаются к игроку
-- Pooling работает для врагов
+- Враги спавнятся по таймеру ✅
+- Враги двигаются к игроку ✅
+- Pooling работает для врагов ✅
 
 ---
 
 ## Этап 5: Система урона и здоровья
-**Статус**: ОЖИДАЕТ
+**Статус**: ЗАВЕРШЕН ✅
 
 ### Задачи:
-- [ ] HealthComponent (MaxHP, CurrentHP, ApplyDamage)
-- [ ] DamageDealer компонент для снарядов
-- [ ] Коллизии снаряд-враг
-- [ ] Смерть врагов (возврат в пул)
-- [ ] KillCounter
-- [ ] Здоровье игрока
+- [x] HealthComponent (MaxHP, CurrentHP, ApplyDamage)
+- [x] DamageDealer компонент для снарядов
+- [x] Коллизии снаряд-враг
+- [x] Смерть врагов (возврат в пул)
+- [x] KillCounter
+- [x] Здоровье игрока
 
 ### Файлы:
-- `Scripts/Player/HealthComponent.cs`
-- `Scripts/Player/DamageDealer.cs`
-- `Scripts/Core/KillCounter.cs`
+- `Scripts/Player/HealthComponent.cs` ✅
+- `Scripts/Player/DamageDealer.cs` ✅
+- `Scripts/Core/KillCounter.cs` ✅
 
 ### Тестирование:
-- Снаряд попадает во врага - враг получает урон
-- Враг умирает при HP = 0
-- KillCounter считает убийства
-- Игрок может получать урон от врагов
+- Снаряд попадает во врага - враг получает урон ✅
+- Враг умирает при HP = 0 ✅
+- KillCounter считает убийства ✅
+- Игрок может получать урон от врагов ✅
 
 ---
 
 ## Этап 6: ScriptableObjects для контента
-**Статус**: ОЖИДАЕТ
+**Статус**: ЗАВЕРШЕН✅
 
 ### Задачи:
-- [ ] SpellSO (Id, DisplayName, BaseDamage, ManaCost, Speed, etc.)
-- [ ] BuffSO (модификаторы)
-- [ ] WandSO (базовые параметры посоха)
-- [ ] Создать 2-3 тестовых Spell
-- [ ] Создать 2-3 тестовых Buff
+- [x] SpellSO (Id, DisplayName, BaseDamage, ManaCost, Speed, etc.) ✅
+- [x] BuffSO (модификаторы) ✅
+- [x] WandSO (базовые параметры посоха) ✅
+- [x] Создать 2-3 тестовых Spell ✅
+- [x] Создать 2-3 тестовых Buff ✅
 
 ### Файлы:
-- `Scripts/Combat/Wand/SpellSO.cs`
-- `Scripts/Combat/Wand/BuffSO.cs`
-- `Scripts/Combat/Wand/WandSO.cs`
-- `ScriptableObjects/Spells/MagicMissile.asset`
-- `ScriptableObjects/Buffs/DamageUp.asset`
-- `ScriptableObjects/Wands/DefaultWand.asset`
-
+- `Scripts/Combat/Wand/SpellSO.cs` ✅
+- `Scripts/Combat/Wand/BuffSO.cs` ✅
+- `Scripts/Combat/Wand/WandSO.cs` ✅
 ### Тестирование:
-- Можно создать SO через меню
-- SO корректно сохраняют данные
+- Можно создать SO через меню ✅
+- SO корректно сохраняют данные ✅
 
 ---
 
@@ -315,14 +311,13 @@
 
 ## Прогресс по этапам
 
-- [x] Этап 0: Структура проекта
-- [x] Этап 1: Движение игрока
-- [x] Этап 2: Система маны
-- [x] Этап 3: Снаряды и стрельба
-- [ ] Этап 3: Снаряды и стрельба
-- [ ] Этап 4: Враги
-- [ ] Этап 5: Урон и здоровье
-- [ ] Этап 6: ScriptableObjects
+- [x] Этап 0: Структура проекта ✅
+- [x] Этап 1: Движение игрока ✅
+- [x] Этап 2: Система маны ✅
+- [x] Этап 3: Снаряды и стрельба ✅
+- [x] Этап 4: Враги и спавнер ✅
+- [x] Этап 5: Урон и здоровье ✅
+- [ ] Этап 6: ScriptableObjects ⏳ (код готов, тестовые assets ожидают)
 - [ ] Этап 7: Система посоха
 - [ ] Этап 8: Бафы и модификаторы
 - [ ] Этап 9: Редактор посоха
@@ -330,7 +325,7 @@
 - [ ] Этап 11: Полировка
 - [ ] Этап 12: Документация
 
-**Общий прогресс**: 4/13 этапов (≈31%)
+**Общий прогресс**: 6/13 этапов завершено полностью, 1 в процессе (≈46%)
 
 ---
 

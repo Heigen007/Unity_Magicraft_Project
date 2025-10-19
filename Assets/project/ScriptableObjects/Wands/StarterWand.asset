@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bac86b9fbdfe4b74ebcb9ba7e0ba9541, type: 3}
+  m_Name: StarterWand
+  m_EditorClassIdentifier: 
+  id: StarterWand
+  displayName: StarterWand
+  description: StarterWand
+  icon: {fileID: 0}
+  tier: 0
+  baseSpells:
+  - {fileID: 11400000, guid: 96d95cd7dca6c714aa75ca9960e728ac, type: 2}
+  maxSpellSlots: 3
+  passiveBuffs: []
+  attackSpeed: 1
+  castDelay: 0.5
+  rechargeTime: 0
+  damageMultiplier: 1
+  manaCostMultiplier: 1
+  cooldownMultiplier: 1
+  wandSprite: {fileID: 0}
+  particleColor: {r: 1, g: 1, b: 1, a: 1}
+  castEffectPrefab: {fileID: 0}
