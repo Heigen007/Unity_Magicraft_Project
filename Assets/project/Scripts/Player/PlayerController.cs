@@ -113,7 +113,8 @@ namespace Magicraft.Player
             }
 
             // Получить позицию мыши в мировых координатах
-            Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseScreenPos = Mouse.current.position.ReadValue(); // НОВЫЙ Input System
+            Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(mouseScreenPos);
             mouseWorldPos.z = 0f;
 
             // Вычислить направление от игрока к мыши

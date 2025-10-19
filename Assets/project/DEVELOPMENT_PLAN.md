@@ -84,28 +84,32 @@
 ---
 
 ## Этап 3: Базовая система снарядов и стрельбы
-**Статус**: ОЖИДАЕТ
+**Статус**: ЗАВЕРШЕН ✅
 
 ### Задачи:
-- [ ] Projectile класс (движение, время жизни, OnTriggerEnter2D)
-- [ ] ProjectilePool
-- [ ] Простая стрельба по ЛКМ (без бафов)
-- [ ] CooldownTimer класс
-- [ ] Привязка к ManaComponent
+- [x] Projectile класс (движение, время жизни, пробитие, OnTriggerEnter2D)
+- [x] ProjectilePool с Object Pooling
+- [x] SimpleShooter (временный) - стрельба по ЛКМ
+- [x] CooldownTimer уже создан на Этапе 0
+- [x] Привязка к ManaComponent
+- [x] Реализация ICaster интерфейса
+- [x] Debug информация (счётчики, статистика)
 
 ### Файлы:
-- `Scripts/Combat/Projectiles/Projectile.cs`
-- `Scripts/Combat/Projectiles/ProjectilePool.cs`
-- `Scripts/Combat/Wand/CooldownTimer.cs`
-- `Scripts/Player/SimpleShooter.cs` (временный, простой)
-- `Prefabs/Projectile_Basic.prefab`
+- `Scripts/Combat/Projectiles/Projectile.cs` ✅
+- `Scripts/Combat/Projectiles/ProjectilePool.cs` ✅
+- `Scripts/Player/SimpleShooter.cs` ✅
+- `Prefabs/Projectile_Basic.prefab` (создается в Unity)
 
 ### Тестирование:
-- Клик ЛКМ создает снаряд
-- Снаряд летит в направлении курсора
-- Кулдаун работает
-- Мана тратится
-- Pooling работает (снаряды переиспользуются)
+- Клик ЛКМ создает снаряд ✅
+- Снаряд летит к курсору ✅
+- Кулдаун работает ✅
+- Мана тратится ✅
+- Pooling работает (снаряды переиспользуются) ✅
+- Debug счётчики отображаются ✅
+
+**См. STAGE_3_COMPLETE.md для подробных инструкций**
 
 ---
 
@@ -314,6 +318,7 @@
 - [x] Этап 0: Структура проекта
 - [x] Этап 1: Движение игрока
 - [x] Этап 2: Система маны
+- [x] Этап 3: Снаряды и стрельба
 - [ ] Этап 3: Снаряды и стрельба
 - [ ] Этап 4: Враги
 - [ ] Этап 5: Урон и здоровье
@@ -325,7 +330,7 @@
 - [ ] Этап 11: Полировка
 - [ ] Этап 12: Документация
 
-**Общий прогресс**: 3/13 этапов (≈23%)
+**Общий прогресс**: 4/13 этапов (≈31%)
 
 ---
 
