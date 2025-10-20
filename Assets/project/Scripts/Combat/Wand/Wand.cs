@@ -99,26 +99,44 @@ namespace Magicraft.Combat
 
         /// <summary>
         /// Загрузить слоты из WandSO
+        /// ЭТАП 8: Теперь можно загружать не только заклинания из baseSpells,
+        /// но и вручную добавлять бафы через AddSlot
         /// </summary>
         private void LoadFromWandData()
         {
             slots.Clear();
 
-            // Добавить базовые заклинания
-            foreach (var spell in wandData.baseSpells)
+            // Добавить базовые заклинания из WandSO
+            if (wandData.baseSpells != null)
             {
-                if (spell != null)
+                foreach (var spell in wandData.baseSpells)
                 {
-                    AddSlot(WandSlot.FromSpell(spell));
+                    if (spell != null)
+                    {
+                        AddSlot(WandSlot.FromSpell(spell));
+                    }
                 }
             }
 
             maxSlots = wandData.maxSpellSlots;
+
+            // Debug информация о пассивных баффах
+            if (wandData.passiveBuffs != null && wandData.passiveBuffs.Count > 0)
+            {
+                Debug.Log($"[Wand] Loaded with {wandData.passiveBuffs.Count} passive buffs:");
+                foreach (var buff in wandData.passiveBuffs)
+                {
+                    if (buff != null)
+                    {
+                        Debug.Log($"  • {buff.DisplayName}");
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Попытка каста текущего слота
-        /// НА ЭТАПЕ 7: без применения модификаторов
+        /// ЭТАП 8: С применением модификаторов от баффов справа
         /// </summary>
         public bool TryCast()
         {
@@ -128,23 +146,25 @@ namespace Magicraft.Combat
                 return false;
             }
 
-            // Найти следующее заклинание для каста
-            WandSlot spellSlot = FindNextSpellSlot();
+            // Найти следующее заклинание для каста и запомнить его индекс
+            int spellSlotIndex = FindNextSpellSlotIndex();
 
-            if (spellSlot.IsEmpty || !spellSlot.IsSpell)
+            if (spellSlotIndex < 0 || spellSlotIndex >= slots.Count)
             {
                 Debug.Log("[Wand] No spell to cast!");
                 return false;
             }
 
-            // Построить CastContext БЕЗ модификаторов (Этап 7)
+            WandSlot spellSlot = slots[spellSlotIndex];
+
             if (spellSlot.Spell == null)
             {
                 Debug.LogError("[Wand] SpellSO is null on the selected slot");
                 return false;
             }
 
-            CastContext context = BuildBasicCastContext(spellSlot.Spell);
+            // Построить CastContext С МОДИФИКАТОРАМИ (Этап 8)
+            CastContext context = BuildCastContextWithModifiers(spellSlot.Spell, spellSlotIndex);
 
             // Проверить ману (если есть caster)
             if (caster != null)
@@ -182,11 +202,11 @@ namespace Magicraft.Combat
         }
 
         /// <summary>
-        /// Найти следующий слот с заклинанием (пропуская бафы)
+        /// Найти индекс следующего слота с заклинанием (пропуская бафы)
         /// </summary>
-        private WandSlot FindNextSpellSlot()
+        private int FindNextSpellSlotIndex()
         {
-            if (slots.Count == 0) return WandSlot.Empty;
+            if (slots.Count == 0) return -1;
 
             int startIndex = currentSlotIndex;
             int attempts = 0;
@@ -197,7 +217,7 @@ namespace Magicraft.Combat
 
                 if (slot.IsSpell)
                 {
-                    return slot;
+                    return currentSlotIndex;
                 }
 
                 // Переключиться на следующий слот
@@ -205,22 +225,72 @@ namespace Magicraft.Combat
                 attempts++;
             }
 
-            return WandSlot.Empty;
+            return -1;
         }
 
         /// <summary>
-        /// Построить базовый CastContext БЕЗ модификаторов
-        /// (На Этапе 8 здесь будет применение бафов)
+        /// Построить CastContext с применением модификаторов
+        /// ЭТАП 8: Применение бафов справа от заклинания + пассивные баффы посоха
         /// </summary>
-        private CastContext BuildBasicCastContext(SpellSO spell)
+        private CastContext BuildCastContextWithModifiers(SpellSO spell, int spellSlotIndex)
         {
-            // Builder принимает ICaster (используем caster или wrapper)
             var builder = new CastContext.Builder(caster, spell);
 
-            // На Этапе 7 просто используем базовые параметры
-            // (модификаторы будут добавлены на Этапе 8)
+            // 1. Применить пассивные баффы посоха (если есть WandSO)
+            if (wandData != null && wandData.passiveBuffs != null)
+            {
+                foreach (var buff in wandData.passiveBuffs)
+                {
+                    if (buff != null && buff.CanAffectSpell(spell))
+                    {
+                        ApplyBuffToBuilder(builder, buff);
+                    }
+                }
+
+                // Применить глобальные множители посоха
+                builder.ApplyDamageMultiplier(wandData.damageMultiplier);
+                builder.ApplyManaCostMultiplier(wandData.manaCostMultiplier);
+                builder.ApplyCooldownMultiplier(wandData.cooldownMultiplier);
+            }
+
+            // 2. Применить баффы справа от заклинания (rightCumulative алгоритм)
+            // Все баффы СПРАВА от текущего слота модифицируют это заклинание
+            for (int i = spellSlotIndex + 1; i < slots.Count; i++)
+            {
+                WandSlot slot = slots[i];
+                if (slot.IsBuff && slot.Buff != null)
+                {
+                    // Проверить фильтр по тегам
+                    if (slot.Buff.CanAffectSpell(spell))
+                    {
+                        ApplyBuffToBuilder(builder, slot.Buff);
+                    }
+                }
+            }
 
             return builder.Build();
+        }
+
+        /// <summary>
+        /// Применить баф к Builder с учётом режима стакания
+        /// </summary>
+        private void ApplyBuffToBuilder(CastContext.Builder builder, BuffSO buff)
+        {
+            // Мультипликативные модификаторы
+            builder.ApplyDamageMultiplier(buff.DamageMultiplier);
+            builder.ApplyManaCostMultiplier(buff.ManaCostMultiplier);
+            builder.ApplyCooldownMultiplier(buff.CooldownMultiplier);
+            builder.ApplySpeedMultiplier(buff.ProjectileSpeedMultiplier);
+
+            // Аддитивные модификаторы
+            builder.AddPierce(buff.AddPierce);
+            builder.AddCritChance(buff.AddCritChance);
+
+            // Крит множитель (берём максимальный)
+            if (buff.CritMultiplier > 1f)
+            {
+                builder.SetCritMultiplier(buff.CritMultiplier);
+            }
         }
 
         /// <summary>
@@ -338,20 +408,118 @@ namespace Magicraft.Combat
             }
         }
 
+        [ContextMenu("Debug: Test Modifiers")]
+        private void DebugTestModifiers()
+        {
+            if (slots.Count == 0)
+            {
+                Debug.LogWarning("[Wand] No slots to test!");
+                return;
+            }
+
+            Debug.Log("=== MODIFIER TEST ===");
+            
+            // Вывести информацию о пассивных баффах посоха
+            if (wandData != null && wandData.passiveBuffs.Count > 0)
+            {
+                Debug.Log($"Wand Passive Buffs ({wandData.passiveBuffs.Count}):");
+                foreach (var buff in wandData.passiveBuffs)
+                {
+                    if (buff != null)
+                    {
+                        Debug.Log($"  • {buff.DisplayName}: DMG x{buff.DamageMultiplier}, Mana x{buff.ManaCostMultiplier}, Speed x{buff.ProjectileSpeedMultiplier}, Pierce +{buff.AddPierce}");
+                    }
+                }
+            }
+
+            // Для каждого заклинания показать, какие баффы на него влияют
+            for (int i = 0; i < slots.Count; i++)
+            {
+                var slot = slots[i];
+                if (slot.IsSpell && slot.Spell != null)
+                {
+                    Debug.Log($"\n[{i}] SPELL: {slot.Spell.DisplayName}");
+                    Debug.Log($"  Base: DMG={slot.Spell.BaseDamage}, Mana={slot.Spell.BaseManaCost}, Speed={slot.Spell.ProjectileSpeed}, Pierce={slot.Spell.Pierce}");
+
+                    // Показать баффы справа
+                    List<string> affectingBuffs = new List<string>();
+                    for (int j = i + 1; j < slots.Count; j++)
+                    {
+                        var buffSlot = slots[j];
+                        if (buffSlot.IsBuff && buffSlot.Buff != null)
+                        {
+                            if (buffSlot.Buff.CanAffectSpell(slot.Spell))
+                            {
+                                affectingBuffs.Add($"[{j}] {buffSlot.Buff.DisplayName}");
+                            }
+                        }
+                    }
+
+                    if (affectingBuffs.Count > 0)
+                    {
+                        Debug.Log($"  Affected by buffs: {string.Join(", ", affectingBuffs)}");
+                    }
+                    else
+                    {
+                        Debug.Log($"  No buffs affecting this spell");
+                    }
+
+                    // Симулировать каст и показать финальные параметры
+                    if (caster != null)
+                    {
+                        var context = BuildCastContextWithModifiers(slot.Spell, i);
+                        Debug.Log($"  FINAL: DMG={context.Damage:F1}, Mana={context.ManaCost:F1}, Speed={context.ProjectileSpeed:F1}, Pierce={context.Pierce}, CD={context.Cooldown:F2}s");
+                    }
+                }
+            }
+            
+            Debug.Log("=== END TEST ===");
+        }
+
         [ContextMenu("Debug: Add Test Spell")]
         private void DebugAddTestSpell()
         {
-            // Попытаться найти любое SpellSO в проекте
-            SpellSO testSpell = Resources.Load<SpellSO>("Spells/MagicMissile");
-            if (testSpell != null)
+            #if UNITY_EDITOR
+            // В режиме редактора можем использовать AssetDatabase
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:SpellSO", new[] { "Assets/project/ScriptableObjects/Spells" });
+            if (guids.Length > 0)
             {
-                AddSlot(WandSlot.FromSpell(testSpell));
-                Debug.Log("[Wand] Added test spell!");
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                SpellSO testSpell = UnityEditor.AssetDatabase.LoadAssetAtPath<SpellSO>(path);
+                if (testSpell != null)
+                {
+                    AddSlot(WandSlot.FromSpell(testSpell));
+                    Debug.Log($"[Wand] Added test spell: {testSpell.DisplayName}");
+                    return;
+                }
             }
-            else
+            Debug.LogWarning("[Wand] No SpellSO found in project! Create one in ScriptableObjects/Spells/");
+            #else
+            Debug.LogWarning("[Wand] This debug method only works in Editor mode!");
+            #endif
+        }
+
+        [ContextMenu("Debug: Add Test Buff")]
+        private void DebugAddTestBuff()
+        {
+            #if UNITY_EDITOR
+            // В режиме редактора можем использовать AssetDatabase
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:BuffSO", new[] { "Assets/project/ScriptableObjects/Buffs" });
+            if (guids.Length > 0)
             {
-                Debug.LogWarning("[Wand] No test spell found!");
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                BuffSO testBuff = UnityEditor.AssetDatabase.LoadAssetAtPath<BuffSO>(path);
+                if (testBuff != null)
+                {
+                    AddSlot(WandSlot.FromBuff(testBuff));
+                    Debug.Log($"[Wand] Added test buff: {testBuff.DisplayName}");
+                    return;
+                }
             }
+            Debug.LogWarning("[Wand] No BuffSO found in project! Create one in ScriptableObjects/Buffs/");
+            #else
+            Debug.LogWarning("[Wand] This debug method only works in Editor mode!");
+            #endif
         }
     }
 
