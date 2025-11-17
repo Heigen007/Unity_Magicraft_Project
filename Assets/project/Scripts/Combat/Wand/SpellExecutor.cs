@@ -38,7 +38,7 @@ namespace Magicraft.Combat
                     break;
 
                 case SpellExecutionType.AoE:
-                    Debug.LogWarning("[SpellExecutor] AoE spells not yet implemented!");
+                    ExecuteAoE(context);
                     break;
 
                 case SpellExecutionType.Self:
@@ -104,12 +104,38 @@ namespace Magicraft.Combat
         }
 
         /// <summary>
-        /// Исполнить заклинание типа AoE (будущее)
+        /// Исполнить заклинание типа AoE
+        /// Создаёт эффект в точке посоха
         /// </summary>
         private void ExecuteAoE(CastContext context)
         {
-            // TODO: Реализация АОЕ заклинаний
-            Debug.LogWarning("[SpellExecutor] AoE execution not implemented yet!");
+            if (context.SourceSpell.ProjectilePrefab == null)
+            {
+                Debug.LogError("[SpellExecutor] AoE spell has no prefab!");
+                return;
+            }
+
+            // Создать эффект в точке кастера (мышки можно добавить позже)
+            Vector2 spawnPos = context.SpawnPosition;
+
+            GameObject effectObj = Object.Instantiate(
+                context.SourceSpell.ProjectilePrefab,
+                spawnPos,
+                Quaternion.identity
+            );
+
+            var effect = effectObj.GetComponent<Projectiles.SpellEffect>();
+            if (effect != null)
+            {
+                // Используем Range как время жизни эффекта
+                effect.SetLifetime(context.Range / 2f);
+                effect.SetDamageRadius(context.Range);
+                effect.Initialize(context, (e) => Object.Destroy(e.gameObject));
+            }
+            else
+            {
+                Debug.LogError("[SpellExecutor] AoE prefab has no SpellEffect component!");
+            }
         }
 
         /// <summary>

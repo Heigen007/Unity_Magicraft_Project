@@ -8,6 +8,9 @@ namespace Magicraft.Combat
     [RequireComponent(typeof(HealthComponent))]
     public class EnemyController : MonoBehaviour
     {
+        // Static событие для RewardSystem
+        public static event System.Action<GameObject> OnAnyEnemyKilled;
+
         [Header("Movement")]
         [Tooltip("Скорость движения")]
         [SerializeField] private float moveSpeed = 3f;
@@ -97,6 +100,9 @@ namespace Magicraft.Combat
         private void OnDeath(GameObject killer)
         {
             isActive = false;
+
+            // Вызвать static событие для систем (RewardSystem и т.д.)
+            OnAnyEnemyKilled?.Invoke(killer);
 
             // Сразу вернуть в пул (без задержки)
             ReturnToPool();

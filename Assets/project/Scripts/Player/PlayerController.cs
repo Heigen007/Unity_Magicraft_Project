@@ -29,10 +29,14 @@ namespace Magicraft.Player
     private Rigidbody2D rb;
     private Camera mainCamera;
     private ManaComponent manaComponent;
+    private Animator animator;
 
         // Input
         private Vector2 moveInput;
         private Vector2 currentVelocity;
+
+        // Animation
+        private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
 
         // Свойства
     public Vector2 MoveDirection => moveInput;
@@ -54,6 +58,9 @@ namespace Magicraft.Player
             // Получить ManaComponent (если есть)
             manaComponent = GetComponent<ManaComponent>();
 
+            // Получить Animator (если есть)
+            animator = GetComponent<Animator>();
+
             // Настройка Rigidbody2D для top-down игры
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -63,6 +70,7 @@ namespace Magicraft.Player
         {
             UpdateAimDirection();
             UpdateRotation();
+            UpdateAnimation();
         }
 
         private void FixedUpdate()
@@ -190,6 +198,17 @@ namespace Magicraft.Player
             moveInput = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
             currentVelocity = Vector2.zero;
+        }
+
+        /// <summary>
+        /// Обновление анимации
+        /// </summary>
+        private void UpdateAnimation()
+        {
+            if (animator != null)
+            {
+                animator.SetBool(IsMovingHash, IsMoving);
+            }
         }
 
         private void OnDrawGizmosSelected()

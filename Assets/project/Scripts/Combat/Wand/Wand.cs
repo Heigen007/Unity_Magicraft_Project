@@ -321,6 +321,49 @@ namespace Magicraft.Combat
         }
 
         /// <summary>
+        /// Добавить слот из ScriptableObject (для RewardSystem)
+        /// </summary>
+        public bool AddSlot(ScriptableObject data, SlotType type)
+        {
+            if (data == null)
+            {
+                Debug.LogWarning("[Wand] Cannot add slot: data is null!");
+                return false;
+            }
+
+            WandSlot newSlot = WandSlot.Empty;
+
+            if (type == SlotType.Spell)
+            {
+                SpellSO spell = data as SpellSO;
+                if (spell != null)
+                {
+                    newSlot = WandSlot.FromSpell(spell);
+                }
+                else
+                {
+                    Debug.LogError("[Wand] Data is not a SpellSO!");
+                    return false;
+                }
+            }
+            else if (type == SlotType.Buff)
+            {
+                BuffSO buff = data as BuffSO;
+                if (buff != null)
+                {
+                    newSlot = WandSlot.FromBuff(buff);
+                }
+                else
+                {
+                    Debug.LogError("[Wand] Data is not a BuffSO!");
+                    return false;
+                }
+            }
+
+            return AddSlot(newSlot);
+        }
+
+        /// <summary>
         /// Удалить слот по индексу
         /// </summary>
         public bool RemoveSlot(int index)

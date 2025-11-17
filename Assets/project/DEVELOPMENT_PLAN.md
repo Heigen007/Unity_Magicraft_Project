@@ -258,26 +258,34 @@
 ---
 
 ## Этап 10: Система наград
-**Статус**: ОЖИДАЕТ
+**Статус**: ЗАВЕРШЕН ✅
 
 ### Задачи:
-- [ ] RewardSystem (слушает каждые 10 убийств)
-- [ ] RewardChoiceUI (3 карточки выбора)
-- [ ] Генерация случайных опций
-- [ ] Пауза игры при выборе
-- [ ] Добавление выбранного в посох
+- [x] RewardSystem (слушает каждые 10 убийств) ✅
+- [x] RewardChoiceUI (3 карточки выбора) ✅
+- [x] Генерация случайных опций ✅
+- [x] Пауза игры при выборе ✅
+- [x] Добавление выбранного в посох ✅
+- [x] KillCounterUI для отображения прогресса ✅
+- [x] Static event pattern для врагов ✅
 
 ### Файлы:
-- `Scripts/Rewards/RewardSystem.cs`
-- `Scripts/Rewards/RewardOption.cs`
-- `Scripts/UI/RewardChoiceUI.cs`
-- `Prefabs/UI_RewardChoice.prefab`
+- `Scripts/Rewards/RewardSystem.cs` ✅
+- `Scripts/Rewards/RewardOption.cs` ✅
+- `Scripts/UI/RewardChoiceUI.cs` ✅
+- `Scripts/UI/RewardCard.cs` ✅
+- `Scripts/UI/KillCounterUI.cs` ✅
+- Обновлён `Scripts/Combat/Wand/Wand.cs` (AddSlot перегрузка) ✅
+- Обновлён `Scripts/Combat/Enemy/EnemyController.cs` (static event) ✅
 
 ### Тестирование:
-- На 10, 20, 30... убийствах появляется меню
-- Игра паузится
-- Выбор применяется к посоху
-- После выбора игра продолжается
+- На 10, 20, 30... убийствах появляется меню ✅
+- Игра паузится ✅
+- Выбор применяется к посоху ✅
+- После выбора игра продолжается ✅
+- Kill Counter отображается в HUD ✅
+
+**См. STAGE_10_COMPLETE.md для подробных инструкций**
 
 ---
 

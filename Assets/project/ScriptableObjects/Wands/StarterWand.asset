@@ -20,8 +20,7 @@ MonoBehaviour:
   baseSpells:
   - {fileID: 11400000, guid: 96d95cd7dca6c714aa75ca9960e728ac, type: 2}
   maxSpellSlots: 3
-  passiveBuffs:
-  - {fileID: 11400000, guid: 253d936457448084aa771ccfaebe3ae6, type: 2}
+  passiveBuffs: []
   attackSpeed: 1
   castDelay: 0.3
   rechargeTime: 0
