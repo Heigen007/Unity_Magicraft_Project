@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2644b675e1020d144a1c96f37d33890f, type: 3}
   m_Name: Water Splash
   m_EditorClassIdentifier: 
-  Id: 
-  DisplayName: 
+  Id: water_splash
+  DisplayName: Water Splash
   Icon: {fileID: 0}
-  Description: 
-  ExecutionType: 0
-  ProjectilePrefab: {fileID: 0}
-  BaseDamage: 10
-  BaseManaCost: 5
-  BaseCooldown: 0.5
-  ProjectileSpeed: 12
-  Range: 10
+  Description: Splashes water dealing area damage
+  ExecutionType: 2
+  ProjectilePrefab: {fileID: 7363785914011994859, guid: 7d42cb74b071b9643bab85cdf7d680cd, type: 3}
+  BaseDamage: 15
+  BaseManaCost: 10
+  BaseCooldown: 0.8
+  ProjectileSpeed: 0.1
+  Range: 1.2
   Pierce: 0
-  Tags: 0400000006000000
+  Tags: 0200000007000000

@@ -162,5 +162,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lifetime: 1
   damageRadius: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
   animator: {fileID: 0}
   damageCollider: {fileID: 0}
+  showDamageRadius: 1
+  debugMessages: 1

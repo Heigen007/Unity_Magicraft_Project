@@ -15,7 +15,7 @@ namespace Magicraft.Player
         [SerializeField] private MonoBehaviour casterComponent;
 
     [Tooltip("Локальное смещение визуала относительно игрока (в дочернем пространстве)")]
-    [SerializeField] private Vector3 localOffset = new Vector3(0.5f, 0f, 0f);
+    [SerializeField] private Vector3 localOffset = new Vector3(3f, 0f, 0f);
 
     [Tooltip("Расстояние от рукояти до кончика посоха в локальных единицах (настройка для точного размещения)")]
     [SerializeField] private float tipDistance = 0.8f;
@@ -54,8 +54,12 @@ namespace Magicraft.Player
                 Muzzle = m.transform;
             }
 
-            // Apply initial offset (holder offset relative to player)
-            transform.localPosition = localOffset;
+            // Apply initial offset only if position is at origin (not set in Inspector)
+            // COMMENTED OUT - let Unity Inspector control the position
+            // if (transform.localPosition == Vector3.zero)
+            // {
+            //     transform.localPosition = localOffset;
+            // }
 
             // Find SpriteRenderer (optional)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -69,18 +73,18 @@ namespace Magicraft.Player
 
         private void Update()
         {
-            if (caster == null) return;
-
-            Vector2 aim = caster.AimDirection;
-            if (aim.sqrMagnitude < 0.0001f) return;
-
-            float angle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
-
-            // Set world rotation so holder faces the aim direction; this keeps base anchored
-            transform.rotation = Quaternion.Euler(0f, 0f, angle);
-
-            // Ensure muzzle stays at tipDistance in local space
-            Muzzle.localPosition = Vector3.right * tipDistance;
+            // WandVisual больше не вращает себя!
+            // Вращение теперь управляется PlayerController для разделения логики
+            // (player rotation отделена от wand rotation)
+            
+            // Убедиться что позиция остаётся стабильной (если не установлена вручную)
+            // Но НЕ перезаписывать, если позиция была изменена в Inspector
+            
+            // Просто убедиться что Muzzle в правильной позиции
+            if (Muzzle != null)
+            {
+                Muzzle.localPosition = Vector3.right * tipDistance;
+            }
         }
 
 #if UNITY_EDITOR

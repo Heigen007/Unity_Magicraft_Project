@@ -1,5 +1,7 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Magicraft.Combat
 {
@@ -25,13 +27,21 @@ namespace Magicraft.Combat
         [SerializeField] private float regenDelay = 3f;
 
         [Header("Invulnerability")]
-        [Tooltip("Неуязвимость после получения урона (в секундах)")]
+        [Tooltip("Неуязвимость после получения урона (в секундах) - ОТКЛЮЧЕНА ДЛЯ НЕСКОЛЬКИХ ВРАГОВ")]
         [SerializeField] private float invulnerabilityDuration = 0f;
+
+        [Header("Player Auto-Revive")]
+        [Tooltip("Автоматическое воскрешение для игрока (только если тег = Player)")]
+        [SerializeField] private bool autoRevivePlayer = true;
 
         // Текущее состояние
         private float currentHealth;
         private float timeSinceLastDamage;
-        private float invulnerabilityTimer;
+        
+        // Таймеры неуязвимости ДЛЯ КАЖДОГО ВРАГА ОТДЕЛЬНО (не общий!)
+        private Dictionary<GameObject, float> invulnerabilityTimers = new Dictionary<GameObject, float>();
+        
+        private bool isPlayer;
 
         // События
         public event Action<float, float> OnHealthChanged; // (current, max)
@@ -48,6 +58,9 @@ namespace Magicraft.Combat
 
         private void Awake()
         {
+            // Проверка, является ли это игроком
+            isPlayer = CompareTag("Player");
+
             // Инициализация здоровья
             if (startHealth <= 0f)
             {
@@ -68,9 +81,25 @@ namespace Magicraft.Combat
             // Обновление таймеров
             timeSinceLastDamage += Time.deltaTime;
             
-            if (invulnerabilityTimer > 0f)
+            // Обновление таймеров неуязвимости ДЛЯ КАЖДОГО врага
+            // Используем ToList() чтобы избежать "Collection was modified" исключения
+            List<GameObject> toRemove = new List<GameObject>();
+            foreach (var attacker in invulnerabilityTimers.Keys.ToList())
             {
-                invulnerabilityTimer -= Time.deltaTime;
+                float timer = invulnerabilityTimers[attacker];
+                timer -= Time.deltaTime;
+                if (timer <= 0f)
+                {
+                    toRemove.Add(attacker);
+                }
+                else
+                {
+                    invulnerabilityTimers[attacker] = timer;
+                }
+            }
+            foreach (var attacker in toRemove)
+            {
+                invulnerabilityTimers.Remove(attacker);
             }
 
             // Регенерация
@@ -88,9 +117,11 @@ namespace Magicraft.Combat
             if (!IsAlive) return;
             if (damage <= 0f) return;
 
-            // Проверка неуязвимости
-            if (invulnerabilityTimer > 0f)
+            // Проверка неуязвимости ДЛЯ ЭТОГО КОНКРЕТНОГО ВРАГА
+            // (каждый враг имеет свой таймер неуязвимости, враги могут атаковать одновременно!)
+            if (attacker != null && invulnerabilityTimers.ContainsKey(attacker) && invulnerabilityTimers[attacker] > 0f)
             {
+                // Этот враг только что атаковал, пропускаем
                 return;
             }
 
@@ -101,10 +132,10 @@ namespace Magicraft.Combat
             // Сбросить таймер регенерации
             timeSinceLastDamage = 0f;
 
-            // Запустить неуязвимость
-            if (invulnerabilityDuration > 0f)
+            // Запустить неуязвимость ТОЛЬКО ДЛЯ ЭТОГО ВРАГА
+            if (invulnerabilityDuration > 0f && attacker != null)
             {
-                invulnerabilityTimer = invulnerabilityDuration;
+                invulnerabilityTimers[attacker] = invulnerabilityDuration;
             }
 
             // События
@@ -161,6 +192,13 @@ namespace Magicraft.Combat
         {
             currentHealth = 0f;
             OnDeath?.Invoke(killer);
+
+            // Автоматическое воскрешение игрока
+            if (isPlayer && autoRevivePlayer)
+            {
+                Debug.Log($"[HealthComponent] Player died! Auto-reviving with full health (100 HP)...");
+                Revive(1f); // Воскресить со 100% здоровья
+            }
         }
 
         /// <summary>
@@ -172,7 +210,9 @@ namespace Magicraft.Combat
 
             currentHealth = maxHealth * Mathf.Clamp01(healthPercent);
             timeSinceLastDamage = regenDelay;
-            invulnerabilityTimer = 0f;
+            
+            // Очистить таймеры неуязвимости при воскрешении
+            invulnerabilityTimers.Clear();
 
             OnRevived?.Invoke();
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
@@ -195,14 +235,28 @@ namespace Magicraft.Combat
             if (!Application.isPlaying) return;
             if (!IsAlive) return;
 
-            // Отображение HP над объектом
+            // Отображение HP над объектом - БОЛЬШОЙ ТЕКСТ
             Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 0.5f);
             if (screenPos.z > 0)
             {
                 screenPos.y = Screen.height - screenPos.y;
-                GUI.color = Color.red;
-                GUI.Label(new Rect(screenPos.x - 30, screenPos.y, 60, 20), 
-                    $"{currentHealth:F0}/{maxHealth:F0}");
+                
+                // УВЕЛИЧЕННЫЙ размер и жирный шрифт
+                GUIStyle style = new GUIStyle(GUI.skin.label);
+                style.fontSize = 24; // Был 12, теперь 24
+                style.fontStyle = FontStyle.Bold;
+                style.normal.textColor = isPlayer ? Color.green : Color.red;
+                
+                // Черная обводка для читаемости
+                GUI.color = Color.black;
+                GUI.Label(new Rect(screenPos.x - 49, screenPos.y - 1, 100, 30), $"{currentHealth:F0}/{maxHealth:F0}", style);
+                GUI.Label(new Rect(screenPos.x - 51, screenPos.y - 1, 100, 30), $"{currentHealth:F0}/{maxHealth:F0}", style);
+                GUI.Label(new Rect(screenPos.x - 50, screenPos.y - 2, 100, 30), $"{currentHealth:F0}/{maxHealth:F0}", style);
+                GUI.Label(new Rect(screenPos.x - 50, screenPos.y, 100, 30), $"{currentHealth:F0}/{maxHealth:F0}", style);
+                
+                // Основной текст
+                GUI.color = Color.white;
+                GUI.Label(new Rect(screenPos.x - 50, screenPos.y - 1, 100, 30), $"{currentHealth:F0}/{maxHealth:F0}", style);
             }
         }
         #endregion

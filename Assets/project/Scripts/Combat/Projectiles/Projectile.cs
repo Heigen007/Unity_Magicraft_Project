@@ -109,9 +109,9 @@ namespace Magicraft.Combat.Projectiles
         {
             if (!isInitialized) return;
 
-            // Игнорировать триггеры
-            if (collision.isTrigger) return;
-
+            // НЕ игнорируем триггеры! Враги тоже триггеры!
+            // Игнорируем только сам снаряд и его эффекты
+            
             // Игнорировать кастера (игрока)
             if (context != null && collision.transform == context.Caster.Muzzle.root)
             {
@@ -124,6 +124,8 @@ namespace Magicraft.Combat.Projectiles
             {
                 // Нанести урон
                 damageable.ApplyDamage(damage, context.Caster.Muzzle.root.gameObject);
+                
+                Debug.Log($"[Projectile] Hit {collision.name} for {damage} damage!");
 
                 // Эффект попадания
                 if (hitEffect != null)

@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2644b675e1020d144a1c96f37d33890f, type: 3}
   m_Name: Grenade
   m_EditorClassIdentifier: 
-  Id: 
-  DisplayName: 
+  Id: Grenade
+  DisplayName: Grenade
   Icon: {fileID: 0}
-  Description: 
-  ExecutionType: 0
-  ProjectilePrefab: {fileID: 0}
-  BaseDamage: 10
-  BaseManaCost: 5
-  BaseCooldown: 0.5
-  ProjectileSpeed: 12
-  Range: 10
+  Description: Throws a grenade that explodes on impact
+  ExecutionType: 2
+  ProjectilePrefab: {fileID: 5916809823433843002, guid: b1aa2cf5419b95645b1ba04e452a41fd, type: 3}
+  BaseDamage: 25
+  BaseManaCost: 15
+  BaseCooldown: 1.5
+  ProjectileSpeed: 0.1
+  Range: 1.5
   Pierce: 0
-  Tags: 0400000006000000
+  Tags: 0100000007000000

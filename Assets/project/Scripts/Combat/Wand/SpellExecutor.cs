@@ -105,7 +105,9 @@ namespace Magicraft.Combat
 
         /// <summary>
         /// Исполнить заклинание типа AoE
-        /// Создаёт эффект в точке посоха
+        /// Создаёт эффект в точке посоха с учётом смещения
+        /// SpawnOffset.x = дополнительное расстояние вдоль направления посоха (как tipDistance)
+        /// SpawnOffset.y = смещение вверх/вниз в мировых координатах (для выравнивания анимации)
         /// </summary>
         private void ExecuteAoE(CastContext context)
         {
@@ -115,8 +117,21 @@ namespace Magicraft.Combat
                 return;
             }
 
-            // Создать эффект в точке кастера (мышки можно добавить позже)
+            // Базовая позиция спавна (уже учитывает tipDistance посоха)
             Vector2 spawnPos = context.SpawnPosition;
+            
+            // Применяем смещение из SpellSO:
+            // X - дополнительное расстояние вдоль направления посоха
+            // Y - смещение вверх/вниз в мировых координатах
+            Vector2 offset = context.SourceSpell.SpawnOffset;
+            if (offset.x != 0f)
+            {
+                // Добавляем расстояние вдоль направления взгляда
+                spawnPos += context.Direction.normalized * offset.x;
+            }
+            
+            // Y просто добавляется как мировая координата (вверх = +Y)
+            spawnPos.y += offset.y;
 
             GameObject effectObj = Object.Instantiate(
                 context.SourceSpell.ProjectilePrefab,
@@ -127,8 +142,32 @@ namespace Magicraft.Combat
             var effect = effectObj.GetComponent<Projectiles.SpellEffect>();
             if (effect != null)
             {
-                // Используем Range как время жизни эффекта
-                effect.SetLifetime(context.Range / 2f);
+                // Используем EffectDuration из SpellSO, если указана
+                // Иначе берем длительность анимации автоматически (если есть Animator)
+                float duration = context.SourceSpell.EffectDuration;
+                if (duration <= 0f)
+                {
+                    // Попытаться получить длительность анимации
+                    var animator = effectObj.GetComponent<Animator>();
+                    if (animator != null && animator.runtimeAnimatorController != null)
+                    {
+                        var clips = animator.runtimeAnimatorController.animationClips;
+                        if (clips.Length > 0)
+                        {
+                            duration = clips[0].length; // Используем первый клип
+                        }
+                        else
+                        {
+                            duration = 1f; // Fallback
+                        }
+                    }
+                    else
+                    {
+                        duration = 1f; // Fallback если нет Animator
+                    }
+                }
+                
+                effect.SetLifetime(duration);
                 effect.SetDamageRadius(context.Range);
                 effect.Initialize(context, (e) => Object.Destroy(e.gameObject));
             }

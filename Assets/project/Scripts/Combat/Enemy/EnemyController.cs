@@ -15,9 +15,6 @@ namespace Magicraft.Combat
         [Tooltip("Скорость движения")]
         [SerializeField] private float moveSpeed = 3f;
 
-        [Tooltip("Дистанция остановки (не приближаться ближе)")]
-        [SerializeField] private float stopDistance = 0.5f;
-
         [Header("References")]
         [Tooltip("Цель (обычно игрок, если null - ищется автоматически)")]
         [SerializeField] private Transform target;
@@ -41,6 +38,14 @@ namespace Magicraft.Combat
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+
+            // Настройка Rigidbody2D для врага
+            if (rb != null)
+            {
+                rb.gravityScale = 0f;
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                // НЕ меняем bodyType - оставляем Dynamic для корректной работы триггеров
             }
 
             // Подписка на смерть
@@ -81,17 +86,10 @@ namespace Magicraft.Combat
             Vector2 direction = (target.position - transform.position).normalized;
             float distance = Vector2.Distance(transform.position, target.position);
 
-            // Двигаться только если дальше stopDistance
-            if (distance > stopDistance)
-            {
-                Vector2 movement = direction * moveSpeed * Time.fixedDeltaTime;
-                rb.MovePosition(rb.position + movement);
-            }
-            else
-            {
-                // Остановиться
-                rb.linearVelocity = Vector2.zero;
-            }
+            // Двигаться всегда в направлении цели (убрал stopDistance - враги не останавливаются)
+            // Используем MovePosition для движения без физических столкновений
+            Vector2 movement = direction * moveSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + movement);
         }
 
         /// <summary>

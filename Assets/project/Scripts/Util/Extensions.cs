@@ -56,6 +56,14 @@ namespace Magicraft.Util
         }
 
         /// <summary>
+        /// Конвертировать Vector2 в Vector3 (z = 0)
+        /// </summary>
+        public static Vector3 ToVector3(this Vector2 v)
+        {
+            return new Vector3(v.x, v.y, 0f);
+        }
+
+        /// <summary>
         /// Конвертировать угол в направление (2D)
         /// </summary>
         public static Vector2 AngleToDirection(float angleDegrees)

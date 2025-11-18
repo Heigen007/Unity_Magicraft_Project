@@ -78,6 +78,13 @@ namespace Magicraft.Combat
         [Tooltip("Пробитие (сколько врагов может пройти снаряд)")]
         public int Pierce = 0;
 
+        [Header("AoE Stats")]
+        [Tooltip("Смещение позиции спавна эффекта от точки выстрела (для AoE)")]
+        public Vector2 SpawnOffset = Vector2.zero;
+
+        [Tooltip("Длительность AOE эффекта (секунды). Если 0 - используется длина анимации")]
+        public float EffectDuration = 0f;
+
         [Header("Tags")]
         [Tooltip("Теги для фильтрации бафами")]
         public List<SpellTag> Tags = new List<SpellTag> { SpellTag.Arcane, SpellTag.Projectile };

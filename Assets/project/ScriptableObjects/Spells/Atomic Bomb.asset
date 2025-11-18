@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2644b675e1020d144a1c96f37d33890f, type: 3}
   m_Name: Atomic Bomb
   m_EditorClassIdentifier: 
-  Id: 
-  DisplayName: 
+  Id: atomic_bomb
+  DisplayName: Atomic Bomb
   Icon: {fileID: 0}
-  Description: 
-  ExecutionType: 0
-  ProjectilePrefab: {fileID: 0}
-  BaseDamage: 10
-  BaseManaCost: 5
-  BaseCooldown: 0.5
-  ProjectileSpeed: 12
-  Range: 10
+  Description: Devastating explosion with massive area damage
+  ExecutionType: 2
+  ProjectilePrefab: {fileID: 5123574056474444728, guid: 853be0c364bed6c49bdef90bf2b47dc5, type: 3}
+  BaseDamage: 50
+  BaseManaCost: 30
+  BaseCooldown: 3
+  ProjectileSpeed: 0.1
+  Range: 2.5
   Pierce: 0
-  Tags: 0400000006000000
+  Tags: 0100000007000000

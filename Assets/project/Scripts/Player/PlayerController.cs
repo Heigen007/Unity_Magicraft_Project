@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Magicraft.Combat;
+using Magicraft.Util;
 
 namespace Magicraft.Player
 {
@@ -19,11 +20,24 @@ namespace Magicraft.Player
         [SerializeField] private float movementSmoothing = 0.05f;
 
         [Header("Rotation")]
-        [Tooltip("Поворачивать ли игрока к курсору мыши")]
-        [SerializeField] private bool rotateTowardsMouse = true;
+        [Tooltip("Поворачивать ли игрока к курсору мыши (ОТКЛЮЧЕНО - только посох!")]
+        [SerializeField] private bool rotateTowardsMouse = false; // ВСЕГДА FALSE
+
+        [Tooltip("Поворачивать ли посох к курсору мыши")]
+        [SerializeField] private bool rotateWandTowardsMouse = true;
 
         [Tooltip("Скорость поворота (0 = мгновенный, выше = плавнее)")]
         [SerializeField] private float rotationSpeed = 0f;
+
+        [Header("Wand Visual")]
+        [Tooltip("Визуал посоха, который поворачивается к мыши")]
+        [SerializeField] private Transform wandVisual;
+
+        [Tooltip("Радиус вращения посоха вокруг игрока (расстояние от центра игрока до точки хвата посоха)")]
+        [SerializeField] private float wandOrbitRadius = 0.5f;
+        
+        [Tooltip("Смещение посоха вперед от точки хвата (длина посоха впереди руки)")]
+        [SerializeField] private float wandForwardOffset = 0.8f;
 
     // Компоненты
     private Rigidbody2D rb;
@@ -34,9 +48,6 @@ namespace Magicraft.Player
         // Input
         private Vector2 moveInput;
         private Vector2 currentVelocity;
-
-        // Animation
-        private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
 
         // Свойства
     public Vector2 MoveDirection => moveInput;
@@ -64,6 +75,9 @@ namespace Magicraft.Player
             // Настройка Rigidbody2D для top-down игры
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            
+            // ВАЖНО: НЕ меняем bodyType - оставляем Dynamic для движения через velocity
+            // Столкновения с врагами будут обрабатываться через коллайдер настройки
         }
 
         private void Update()
@@ -157,11 +171,11 @@ namespace Magicraft.Player
         #endregion
 
         /// <summary>
-        /// Поворот игрока в направлении курсора
+        /// Поворот игрока и/или посоха в направлении курсора
         /// </summary>
         private void UpdateRotation()
         {
-            if (!rotateTowardsMouse || AimDirection.sqrMagnitude < 0.01f)
+            if (AimDirection.sqrMagnitude < 0.01f)
             {
                 return;
             }
@@ -169,16 +183,43 @@ namespace Magicraft.Player
             // Вычислить угол к курсору
             float targetAngle = Mathf.Atan2(AimDirection.y, AimDirection.x) * Mathf.Rad2Deg;
 
-            // Применить поворот (мгновенный или плавный)
-            if (rotationSpeed > 0f)
+            // Поворот игрока (обычно выключен)
+            if (rotateTowardsMouse)
             {
-                float currentAngle = transform.eulerAngles.z;
-                float smoothAngle = Mathf.LerpAngle(currentAngle, targetAngle, Time.deltaTime * rotationSpeed);
-                transform.rotation = Quaternion.Euler(0f, 0f, smoothAngle);
+                if (rotationSpeed > 0f)
+                {
+                    float currentAngle = transform.eulerAngles.z;
+                    float smoothAngle = Mathf.LerpAngle(currentAngle, targetAngle, Time.deltaTime * rotationSpeed);
+                    transform.rotation = Quaternion.Euler(0f, 0f, smoothAngle);
+                }
+                else
+                {
+                    transform.rotation = Quaternion.Euler(0f, 0f, targetAngle);
+                }
             }
-            else
+
+            // Поворот посоха (обычно включен)
+            if (rotateWandTowardsMouse && wandVisual != null)
             {
-                transform.rotation = Quaternion.Euler(0f, 0f, targetAngle);
+                // 1. Сначала поворачиваем посох в направлении мыши
+                if (rotationSpeed > 0f)
+                {
+                    float currentWandAngle = wandVisual.eulerAngles.z;
+                    float smoothWandAngle = Mathf.LerpAngle(currentWandAngle, targetAngle, Time.deltaTime * rotationSpeed);
+                    wandVisual.rotation = Quaternion.Euler(0f, 0f, smoothWandAngle);
+                }
+                else
+                {
+                    wandVisual.rotation = Quaternion.Euler(0f, 0f, targetAngle);
+                }
+                
+                // 2. Теперь позиционируем посох:
+                // - Точка хвата находится на расстоянии wandOrbitRadius от игрока в направлении мыши
+                // - Сам посох смещен назад на wandForwardOffset, чтобы точка хвата была правильной
+                Vector3 gripPosition = transform.position + (AimDirection * wandOrbitRadius).ToVector3();
+                Vector3 wandPosition = gripPosition - (AimDirection * wandForwardOffset).ToVector3();
+                
+                wandVisual.position = wandPosition;
             }
         }
 
@@ -205,10 +246,13 @@ namespace Magicraft.Player
         /// </summary>
         private void UpdateAnimation()
         {
-            if (animator != null)
+            if (animator == null)
             {
-                animator.SetBool(IsMovingHash, IsMoving);
+                return; // Animator не назначен, пропускаем
             }
+
+            bool isMoving = IsMoving;
+            animator.SetBool("isMoving", isMoving); // Маленькая буква - как в вашей анимации
         }
 
         private void OnDrawGizmosSelected()
