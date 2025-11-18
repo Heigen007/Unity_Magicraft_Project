@@ -24,4 +24,6 @@ MonoBehaviour:
   ProjectileSpeed: 0.1
   Range: 2.5
   Pierce: 0
+  SpawnOffset: {x: 2, y: 2}
+  EffectDuration: 0
   Tags: 0100000007000000

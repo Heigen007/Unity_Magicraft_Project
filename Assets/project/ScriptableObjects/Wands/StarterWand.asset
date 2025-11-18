@@ -18,7 +18,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   tier: 0
   baseSpells:
-  - {fileID: 11400000, guid: 96d95cd7dca6c714aa75ca9960e728ac, type: 2}
+  - {fileID: 11400000, guid: 408313ec42d7f434794671715b4dab85, type: 2}
   maxSpellSlots: 3
   passiveBuffs: []
   attackSpeed: 1
