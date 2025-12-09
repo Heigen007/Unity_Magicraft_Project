@@ -1696,6 +1696,57 @@ MonoBehaviour:
   cardsContainer: {fileID: 2002580394}
   cardPrefab: {fileID: 1797685963005198333, guid: d3f5819a74c2cdb4aa6189490358ce38, type: 3}
   pauseGameOnShow: 1
+--- !u!1 &1793171129
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1793171131}
+  - component: {fileID: 1793171130}
+  m_Layer: 0
+  m_Name: TerrainLoader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1793171130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793171129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f516e2de514a4428c0d4c117c40db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkSize: 16
+  viewDistance: 3
+  noiseScale: 5
+  seed: 12345
+  player: {fileID: 1478174708}
+  terrainMaterial: {fileID: 0}
+  showDebug: 1
+--- !u!4 &1793171131
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793171129}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 729.74786, y: 261.6882, z: -18.080696}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1875402853
 GameObject:
   m_ObjectHideFlags: 0
@@ -2102,8 +2153,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b97c35b2e921ea54491dc5227401a18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 2394333805222984715, guid: b8ea6c33858fde44a8612e3aeae6cf2a, type: 3}
-  initialPoolSize: 30
+  enemyPrefabs:
+  - {fileID: 1083178093716208453, guid: 2133ebe4077202a4ba84ebaf7896f691, type: 3}
+  - {fileID: 1282874700639381264, guid: 80d14d0e89d032046888e11c98ee9ce5, type: 3}
+  initialPoolSizePerType: 15
   poolParent: {fileID: 0}
 --- !u!4 &1943539755
 Transform:
@@ -2518,3 +2571,4 @@ SceneRoots:
   - {fileID: 1496257031}
   - {fileID: 1943539755}
   - {fileID: 244437244}
+  - {fileID: 1793171131}
