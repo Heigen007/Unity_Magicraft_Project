@@ -48,6 +48,20 @@ namespace Magicraft.Combat.Projectiles
                 animator = GetComponent<Animator>();
             }
 
+            // Автоматически установить Enemy layer если не назначен
+            if (enemyLayer == 0)
+            {
+                int enemyLayerIndex = LayerMask.NameToLayer("Enemy");
+                if (enemyLayerIndex != -1)
+                {
+                    enemyLayer = 1 << enemyLayerIndex;
+                }
+                else
+                {
+                    Debug.LogWarning("[SpellEffect] Enemy layer не найден! Создайте слой 'Enemy' в Project Settings.");
+                }
+            }
+
             if (damageCollider == null)
             {
                 damageCollider = GetComponent<Collider2D>();
@@ -60,8 +74,8 @@ namespace Magicraft.Combat.Projectiles
 
             aliveTime += Time.deltaTime;
 
-            // Наносим урон каждый кадр (покуда анимация активна)
-            DealAoEDamage();
+            // Урон наносится ОДИН РАЗ при спавне (в Initialize через первый кадр Update)
+            // Не наносим урон каждый кадр для мгновенных взрывов
 
             if (aliveTime >= lifetime)
             {
@@ -106,7 +120,7 @@ namespace Magicraft.Combat.Projectiles
                 }
             }
 
-            // СРАЗУ наносим урон ВСЕМ врагам в радиусе
+            // Нанести урон СРАЗУ при спавне (мгновенный взрыв)
             DealAoEDamage();
         }
 

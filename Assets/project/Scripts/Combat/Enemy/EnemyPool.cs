@@ -10,17 +10,17 @@ namespace Magicraft.Combat.Enemy
     public class EnemyPool : MonoBehaviour
     {
         [Header("Pool Settings")]
-        [Tooltip("Префаб врага")]
-        public EnemyController enemyPrefab;
+        [Tooltip("Массив префабов врагов (разные типы)")]
+        public EnemyController[] enemyPrefabs;
 
-        [Tooltip("Начальный размер пула")]
-        public int initialPoolSize = 30;
+        [Tooltip("Начальный размер пула для каждого типа")]
+        public int initialPoolSizePerType = 15;
 
         [Tooltip("Родитель для врагов в иерархии")]
         [SerializeField] private Transform poolParent;
 
-        // Пул
-        private ObjectPool<EnemyController> pool;
+        // Массив пулов (по одному на тип врага)
+        private ObjectPool<EnemyController>[] pools;
 
         // Singleton
         private static EnemyPool instance;
@@ -31,7 +31,7 @@ namespace Magicraft.Combat.Enemy
         /// </summary>
         public void Initialize()
         {
-            if (pool != null)
+            if (pools != null)
             {
                 return; // Уже инициализирован
             }
@@ -65,33 +65,67 @@ namespace Magicraft.Combat.Enemy
                 poolParent.SetParent(transform);
             }
 
-            // Создать пул
-            if (enemyPrefab != null)
+            // Проверить массив префабов
+            if (enemyPrefabs == null || enemyPrefabs.Length == 0)
             {
-                pool = new ObjectPool<EnemyController>(enemyPrefab, poolParent, initialPoolSize);
+                Debug.LogError("[EnemyPool] Enemy Prefabs не назначены!", this);
+                return;
             }
-            else
+
+            // Создать пул для каждого типа врага
+            pools = new ObjectPool<EnemyController>[enemyPrefabs.Length];
+            
+            for (int i = 0; i < enemyPrefabs.Length; i++)
             {
-                Debug.LogError("[EnemyPool] Enemy Prefab не назначен!", this);
+                if (enemyPrefabs[i] != null)
+                {
+                    pools[i] = new ObjectPool<EnemyController>(enemyPrefabs[i], poolParent, initialPoolSizePerType);
+                }
+                else
+                {
+                    Debug.LogError($"[EnemyPool] Enemy Prefab [{i}] не назначен!", this);
+                }
             }
         }
 
         /// <summary>
-        /// Получить врага из пула
+        /// Получить врага из пула (случайный тип)
         /// </summary>
         public EnemyController Get(Vector3 position, Transform target)
         {
-            if (pool == null)
+            if (pools == null || pools.Length == 0)
             {
-                Debug.LogError("[EnemyPool] Пул не инициализирован!");
+                Debug.LogError("[EnemyPool] Пулы не инициализированы!");
                 return null;
             }
 
-            EnemyController enemy = pool.Get();
+            // Выбрать случайный тип врага
+            int randomIndex = Random.Range(0, pools.Length);
+            return GetByType(randomIndex, position, target);
+        }
+
+        /// <summary>
+        /// Получить врага конкретного типа из пула
+        /// </summary>
+        public EnemyController GetByType(int typeIndex, Vector3 position, Transform target)
+        {
+            if (pools == null || typeIndex < 0 || typeIndex >= pools.Length)
+            {
+                Debug.LogError($"[EnemyPool] Неверный индекс типа: {typeIndex}");
+                return null;
+            }
+
+            if (pools[typeIndex] == null)
+            {
+                Debug.LogError($"[EnemyPool] Пул типа {typeIndex} не создан!");
+                return null;
+            }
+
+            EnemyController enemy = pools[typeIndex].Get();
             
             if (enemy == null)
             {
-                Debug.LogError("[EnemyPool] pool.Get() вернул null!");
+                Debug.LogError($"[EnemyPool] pool[{typeIndex}].Get() вернул null!");
                 return null;
             }
 
@@ -106,18 +140,31 @@ namespace Magicraft.Combat.Enemy
         /// </summary>
         public void Return(EnemyController enemy)
         {
-            if (pool != null && enemy != null)
+            if (pools == null || enemy == null) return;
+
+            // Найти правильный пул для этого врага
+            for (int i = 0; i < pools.Length; i++)
             {
-                pool.Return(enemy);
+                if (pools[i] != null && pools[i].BelongsToPool(enemy))
+                {
+                    pools[i].Return(enemy);
+                    return;
+                }
             }
         }
 
         /// <summary>
-        /// Очистить весь пул
+        /// Очистить все пулы
         /// </summary>
         public void ClearPool()
         {
-            pool?.Clear();
+            if (pools != null)
+            {
+                foreach (var pool in pools)
+                {
+                    pool?.Clear();
+                }
+            }
         }
 
         private void OnDestroy()
@@ -133,11 +180,17 @@ namespace Magicraft.Combat.Enemy
         {
             if (!Application.isPlaying) return;
 
-            // Отображение статистики пула
-            if (pool != null)
+            // Отображение статистики всех пулов
+            if (pools != null)
             {
-                GUI.Label(new Rect(10, 120, 300, 20), 
-                    $"Enemy Pool: {pool.AvailableCount} available / {pool.TotalCount} total");
+                for (int i = 0; i < pools.Length; i++)
+                {
+                    if (pools[i] != null)
+                    {
+                        GUI.Label(new Rect(10, 120 + i * 20, 300, 20), 
+                            $"Enemy Type {i + 1}: {pools[i].AvailableCount} available / {pools[i].TotalCount} total");
+                    }
+                }
             }
         }
         #endregion

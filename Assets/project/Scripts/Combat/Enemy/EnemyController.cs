@@ -23,6 +23,9 @@ namespace Magicraft.Combat
         [Tooltip("SpriteRenderer для визуальных эффектов")]
         [SerializeField] private SpriteRenderer spriteRenderer;
 
+        [Tooltip("Animator для анимаций врага")]
+        [SerializeField] private Animator animator;
+
         // Компоненты
         private HealthComponent healthComponent;
         private Rigidbody2D rb;
@@ -38,6 +41,11 @@ namespace Magicraft.Combat
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+
+            if (animator == null)
+            {
+                animator = GetComponent<Animator>();
             }
 
             // Настройка Rigidbody2D для врага
@@ -77,7 +85,8 @@ namespace Magicraft.Combat
             // Движение к цели
             MoveToTarget();
         }
-
+            
+            // Обновление визуала (flip спрайта)
         /// <summary>
         /// Движение к цели
         /// </summary>
@@ -90,6 +99,32 @@ namespace Magicraft.Combat
             // Используем MovePosition для движения без физических столкновений
             Vector2 movement = direction * moveSpeed * Time.fixedDeltaTime;
             rb.MovePosition(rb.position + movement);
+        }
+
+        /// <summary>
+        /// Обновление визуала: flip спрайта в зависимости от направления движения
+        /// </summary>
+        private void UpdateVisuals()
+        {
+            if (target == null || spriteRenderer == null) return;
+
+            // Направление к цели
+            Vector2 direction = (target.position - transform.position).normalized;
+
+            // Флип по X: если движемся влево (direction.x < 0), flip = true
+            if (Mathf.Abs(direction.x) > 0.1f)
+            {
+                spriteRenderer.flipX = direction.x < 0;
+            }
+
+            // Обновление анимации (опционально, если добавлены параметры)
+            if (animator != null)
+            {
+                // Враги всегда в движении, анимация Walk играет по умолчанию
+                // Если добавишь параметр isMoving:
+                // bool moving = rb.linearVelocity.sqrMagnitude > 0.01f;
+                // animator.SetBool("isMoving", moving);
+            }
         }
 
         /// <summary>

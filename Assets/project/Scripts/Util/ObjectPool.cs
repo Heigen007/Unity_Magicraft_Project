@@ -115,5 +115,13 @@ namespace Magicraft.Util
         /// Общее количество созданных объектов
         /// </summary>
         public int TotalCount => allObjects.Count;
+
+        /// <summary>
+        /// Проверить принадлежит ли объект этому пулу
+        /// </summary>
+        public bool BelongsToPool(T instance)
+        {
+            return instance != null && allObjects.Contains(instance);
+        }
     }
 }
